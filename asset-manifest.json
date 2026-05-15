@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/Instant-Quote/static/css/main.6cd2a9b8.css",
+    "main.js": "/Instant-Quote/static/js/main.e1f25d38.js",
+    "index.html": "/Instant-Quote/index.html",
+    "main.6cd2a9b8.css.map": "/Instant-Quote/static/css/main.6cd2a9b8.css.map",
+    "main.e1f25d38.js.map": "/Instant-Quote/static/js/main.e1f25d38.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.6cd2a9b8.css",
+    "static/js/main.e1f25d38.js"
+  ]
+}
