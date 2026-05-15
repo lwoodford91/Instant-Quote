@@ -7,6 +7,8 @@
 
 body {
   background: #0a0a0f;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
   font-family: Georgia, 'Times New Roman', serif;
   color: #f0ece4;
   min-height: 100vh;
