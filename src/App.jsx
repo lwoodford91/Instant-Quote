@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState } from "react";
 
 const PACKAGES = {
   "Sing Karaoke": 129,
@@ -50,36 +50,7 @@ function getDeliveryFee(miles) {
 const STEPS = ["Package", "Add-Ons", "Delivery", "Discount", "Quote"];
 const ORIGIN = "7201 Paul Green Dr, Highland, CA 92346";
 
-// Uses OpenStreetMap Nominatim (free, no key, no CORS issues)
-async function geocode(address) {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
-  const res = await fetch(url, { headers: { "Accept-Language": "en" } });
-  const data = await res.json();
-  if (!data || data.length === 0) throw new Error("Address not found");
-  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
-}
 
-function haversineDistance(a, b) {
-  const R = 3958.8;
-  const dLat = (b.lat - a.lat) * Math.PI / 180;
-  const dLng = (b.lng - a.lng) * Math.PI / 180;
-  const x =
-    Math.sin(dLat / 2) ** 2 +
-    Math.cos(a.lat * Math.PI / 180) *
-    Math.cos(b.lat * Math.PI / 180) *
-    Math.sin(dLng / 2) ** 2;
-  const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-  // +20% straight-line to approximate driving miles
-  return Math.round(R * c * 1.2 * 10) / 10;
-}
-
-async function estimateMiles(destination) {
-  const [originCoords, destCoords] = await Promise.all([
-    geocode(ORIGIN),
-    geocode(destination),
-  ]);
-  return haversineDistance(originCoords, destCoords);
-}
 
 function applyDiscount(amount, code) {
   if (code === "50off") return amount * 0.5;
@@ -102,13 +73,11 @@ export default function PalmwoodApp() {
   const [deliveryOption, setDeliveryOption] = useState(null);
   const [deliveryAddress, setDeliveryAddress] = useState("");
   const [deliveryMiles, setDeliveryMiles] = useState(null);
-  const [milesLoading, setMilesLoading] = useState(false);
-  const [milesError, setMilesError] = useState("");
+
   const [discountDelivery, setDiscountDelivery] = useState("none");
   const [discountLabor, setDiscountLabor] = useState("none");
   const [copied, setCopied] = useState(false);
   const [animating, setAnimating] = useState(false);
-  const debounceRef = useRef(null);
 
   const basePrice = selectedPackage ? PACKAGES[selectedPackage] : 0;
   const addonTotal = selectedAddons.reduce((sum, a) => sum + ADDONS[a], 0);
@@ -120,28 +89,7 @@ export default function PalmwoodApp() {
   const deposit = Math.round(subTotal * 0.25);
   const remaining = subTotal - deposit;
 
-  useEffect(() => {
-    if (deliveryOption !== "delivery" || deliveryOption === "delivery-tbd" || !deliveryAddress || deliveryAddress.length < 8) {
-      setDeliveryMiles(null);
-      setMilesError("");
-      return;
-    }
-    clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(async () => {
-      setMilesLoading(true);
-      setMilesError("");
-      setDeliveryMiles(null);
-      try {
-        const miles = await estimateMiles(deliveryAddress);
-        setDeliveryMiles(miles);
-      } catch {
-        setMilesError("Couldn't estimate distance — please check the address.");
-      } finally {
-        setMilesLoading(false);
-      }
-    }, 900);
-    return () => clearTimeout(debounceRef.current);
-  }, [deliveryAddress, deliveryOption]);
+
 
   function toggleAddon(addon) {
     setSelectedAddons(prev => prev.includes(addon) ? prev.filter(a => a !== addon) : [...prev, addon]);
@@ -198,7 +146,10 @@ https://www.palmwoodrentals.com/booking`;
   const canProceed = [
     !!selectedPackage,
     true,
-    deliveryOption !== null,
+    deliveryOption !== null && (
+      deliveryOption !== "delivery" ||
+      (deliveryAddress.length > 5 && deliveryMiles !== null && deliveryMiles > 0)
+    ),
     true,
     true,
   ][step];
@@ -584,17 +535,7 @@ function Divider() {
   return <div style={{ height: 1, background: "rgba(201,168,92,0.12)", margin: "12px 0" }} />;
 }
 
-function Spinner() {
-  return (
-    <div style={{
-      width: 14, height: 14, borderRadius: "50%",
-      border: "2px solid rgba(201,168,92,0.2)", borderTopColor: "#c9a85c",
-      animation: "spin 0.7s linear infinite", flexShrink: 0,
-    }}>
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-    </div>
-  );
-}
+
 
 const inputStyle = {
   width: "100%", background: "rgba(255,255,255,0.05)",
