@@ -156,7 +156,7 @@ https://www.palmwoodrentals.com/booking`;
       color: "#f0ece4",
       display: "flex", flexDirection: "column", alignItems: "center",
     }}>
-      <div style={{ width: "100%", maxWidth: 640, padding: "36px 24px 0", textAlign: "center" }}>
+      <div style={{ width: "100%", maxWidth: 640, padding: "max(36px, calc(env(safe-area-inset-top) + 16px)) 24px 0", textAlign: "center" }}>
         <div style={{ fontSize: 13, letterSpacing: "0.3em", color: "#c9a85c", textTransform: "uppercase", marginBottom: 6 }}>
           Palmwood Rentals
         </div>
