@@ -9,7 +9,7 @@ A mobile-friendly quote builder app for Palmwood Rentals karaoke & event package
 - **Package selection** — Sing Karaoke, Spotlight Karaoke, Superstar Karaoke, Movie Night
 - **Add-ons** — Wireless mics, TV rental, wired mics, Attendant (hourly)
 - **Delivery** — Auto-calculates driving distance & fee from Highland, CA using AI
-- **Delivery TBD** — Option to send quote without address, with pending note
+- **Delivery TBD** — Option to send quote without address, with pending note 
 - **Discounts** — Independent 50% / 75% off controls for Delivery and Labor
 - **Quote output** — Itemized quote with deposit breakdown, copies to clipboard
 - **Booking link** — Direct link to palmwoodrentals.com/booking
