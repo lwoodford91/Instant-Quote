@@ -96,7 +96,7 @@ export default function PalmwoodApp() {
   function goNext() { setStep(s => s + 1); }
   function goBack() { setStep(s => s - 1); }
 
-  function copyQuote() {
+  function buildQuoteText() {
     const addonLines = selectedAddons.length > 0
       ? selectedAddons.map(a => `  • ${a} — $${ADDONS[a]}`).join("\n") : "  • None";
     const attendantLine = includeAttendant
@@ -109,7 +109,7 @@ export default function PalmwoodApp() {
         : `  ⏳ Awaiting delivery address — fee will be added to quote once address is provided`
       : "  No Delivery / Self-Pickup";
 
-    const quote = `🎤 Palmwood Rentals Quote
+    return `🎤 Palmwood Rentals Quote
 ━━━━━━━━━━━━━━━━━━━━━━━━━
 Package: ${selectedPackage}
 Base Price: $${basePrice}
@@ -128,8 +128,10 @@ Remaining Due Day of Event: $${remaining.toFixed(2)}
 
 If everything looks good and you're ready to book, click the link below!
 https://www.palmwoodrentals.com/booking`;
+  }
 
-    navigator.clipboard.writeText(quote).then(() => {
+  function copyQuote() {
+    navigator.clipboard.writeText(buildQuoteText()).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2500);
     });
@@ -403,6 +405,7 @@ https://www.palmwoodrentals.com/booking`;
                 </div>
               </div>
 
+              {/* Copy to clipboard */}
               <button onClick={copyQuote} style={{
                 width: "100%",
                 background: copied ? "linear-gradient(135deg, #2a5c2a, #1a4a1a)" : "linear-gradient(135deg, #c9a85c, #e8c87a)",
@@ -411,9 +414,42 @@ https://www.palmwoodrentals.com/booking`;
                 fontSize: 15, fontWeight: 700, cursor: "pointer",
                 letterSpacing: "0.05em", transition: "all 0.3s",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                marginBottom: 10,
               }}>
                 {copied ? "✓ Copied to Clipboard!" : "📋 Copy Quote to Clipboard"}
               </button>
+
+              {/* Share buttons */}
+              <div style={{ display: "flex", gap: 10 }}>
+                <a
+                  href={`sms:&body=${encodeURIComponent(buildQuoteText())}`}
+                  style={{
+                    flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    background: "rgba(37,211,102,0.12)", border: "1.5px solid rgba(37,211,102,0.3)",
+                    borderRadius: 12, padding: "13px", color: "#25d366",
+                    fontSize: 14, fontWeight: 600, textDecoration: "none",
+                    letterSpacing: "0.03em", transition: "all 0.2s",
+                  }}
+                >
+                  💬 Send via iMessage
+                </a>
+                <a
+                  href={`fb-messenger://share?link=${encodeURIComponent("https://www.palmwoodrentals.com/booking")}&app_id=966242223397117`}
+                  onClick={(e) => {
+                    // Copy quote to clipboard first so they can paste it
+                    navigator.clipboard.writeText(buildQuoteText());
+                  }}
+                  style={{
+                    flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                    background: "rgba(0,132,255,0.12)", border: "1.5px solid rgba(0,132,255,0.3)",
+                    borderRadius: 12, padding: "13px", color: "#0084ff",
+                    fontSize: 14, fontWeight: 600, textDecoration: "none",
+                    letterSpacing: "0.03em", transition: "all 0.2s",
+                  }}
+                >
+                  💙 Send via Messenger
+                </a>
+              </div>
             </div>
           )}
         </div>
