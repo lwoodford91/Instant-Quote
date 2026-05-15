@@ -50,43 +50,34 @@ function getDeliveryFee(miles) {
 const STEPS = ["Package", "Add-Ons", "Delivery", "Discount", "Quote"];
 const ORIGIN = "7201 Paul Green Dr, Highland, CA 92346";
 
-function loadGoogleMaps(apiKey) {
-  return new Promise((resolve, reject) => {
-    if (window.google && window.google.maps) { resolve(); return; }
-    const script = document.createElement("script");
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
-    script.async = true;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
+async function geocode(address, apiKey) {
+  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
+  const res = await fetch(url);
+  const data = await res.json();
+  if (data.status !== "OK" || !data.results[0]) throw new Error("Geocode failed");
+  return data.results[0].geometry.location; // { lat, lng }
+}
+
+function haversineDistance(a, b) {
+  const R = 3958.8; // Earth radius in miles
+  const dLat = (b.lat - a.lat) * Math.PI / 180;
+  const dLng = (b.lng - a.lng) * Math.PI / 180;
+  const x = Math.sin(dLat / 2) ** 2 +
+    Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) *
+    Math.sin(dLng / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
+  // Add ~20% to straight-line distance to approximate driving distance
+  return Math.round(R * c * 1.2 * 10) / 10;
 }
 
 async function estimateMiles(destination) {
   const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
   if (!apiKey) throw new Error("Google Maps API key not configured");
-
-  await loadGoogleMaps(apiKey);
-
-  return new Promise((resolve, reject) => {
-    const service = new window.google.maps.DistanceMatrixService();
-    service.getDistanceMatrix(
-      {
-        origins: [ORIGIN],
-        destinations: [destination],
-        travelMode: window.google.maps.TravelMode.DRIVING,
-        unitSystem: window.google.maps.UnitSystem.IMPERIAL,
-      },
-      (response, status) => {
-        if (status !== "OK") { reject(new Error("Maps error: " + status)); return; }
-        const element = response.rows?.[0]?.elements?.[0];
-        if (!element || element.status !== "OK") { reject(new Error("No route found")); return; }
-        // distance.value is in meters
-        const miles = element.distance.value / 1609.344;
-        resolve(Math.round(miles * 10) / 10);
-      }
-    );
-  });
+  const [originCoords, destCoords] = await Promise.all([
+    geocode(ORIGIN, apiKey),
+    geocode(destination, apiKey),
+  ]);
+  return haversineDistance(originCoords, destCoords);
 }
 
 function applyDiscount(amount, code) {
