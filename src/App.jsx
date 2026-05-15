@@ -50,32 +50,33 @@ function getDeliveryFee(miles) {
 const STEPS = ["Package", "Add-Ons", "Delivery", "Discount", "Quote"];
 const ORIGIN = "7201 Paul Green Dr, Highland, CA 92346";
 
-async function geocode(address, apiKey) {
-  const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(address)}&key=${apiKey}`;
-  const res = await fetch(url);
+// Uses OpenStreetMap Nominatim (free, no key, no CORS issues)
+async function geocode(address) {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(address)}&format=json&limit=1`;
+  const res = await fetch(url, { headers: { "Accept-Language": "en" } });
   const data = await res.json();
-  if (data.status !== "OK" || !data.results[0]) throw new Error("Geocode failed");
-  return data.results[0].geometry.location; // { lat, lng }
+  if (!data || data.length === 0) throw new Error("Address not found");
+  return { lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) };
 }
 
 function haversineDistance(a, b) {
-  const R = 3958.8; // Earth radius in miles
+  const R = 3958.8;
   const dLat = (b.lat - a.lat) * Math.PI / 180;
   const dLng = (b.lng - a.lng) * Math.PI / 180;
-  const x = Math.sin(dLat / 2) ** 2 +
-    Math.cos(a.lat * Math.PI / 180) * Math.cos(b.lat * Math.PI / 180) *
+  const x =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(a.lat * Math.PI / 180) *
+    Math.cos(b.lat * Math.PI / 180) *
     Math.sin(dLng / 2) ** 2;
   const c = 2 * Math.atan2(Math.sqrt(x), Math.sqrt(1 - x));
-  // Add ~20% to straight-line distance to approximate driving distance
+  // +20% straight-line to approximate driving miles
   return Math.round(R * c * 1.2 * 10) / 10;
 }
 
 async function estimateMiles(destination) {
-  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
-  if (!apiKey) throw new Error("Google Maps API key not configured");
   const [originCoords, destCoords] = await Promise.all([
-    geocode(ORIGIN, apiKey),
-    geocode(destination, apiKey),
+    geocode(ORIGIN),
+    geocode(destination),
   ]);
   return haversineDistance(originCoords, destCoords);
 }
