@@ -11,8 +11,8 @@ const ADDONS = {
   "Two Wireless Mics": 30,
   "Four Wireless Mics": 60,
   "TV Rental": 30,
-  "Wired Mic Thirty": 5,
-  "Wired Mic Fifty": 7,
+  "Wired Mic 30' Cable": 5,
+  "Wired Mic 50' Cable": 7,
 };
 
 const DELIVERY_TIERS = [
@@ -36,8 +36,8 @@ const ADDON_ICONS = {
   "Two Wireless Mics": "🎙️",
   "Four Wireless Mics": "🎙️",
   "TV Rental": "📺",
-  "Wired Mic Thirty": "🎤",
-  "Wired Mic Fifty": "🎤",
+  "Wired Mic 30' Cable": "🎤",
+  "Wired Mic 50' Cable": "🎤",
 };
 
 function getDeliveryFee(miles) {
@@ -115,12 +115,15 @@ Package: ${selectedPackage}
 Base Price: $${basePrice}
 
 Add-Ons:
+
 ${addonLines}${attendantLine ? "\n" + attendantLine : ""}
 Add-On Total: $${(addonTotal + discountedAttendant).toFixed(2)}
 
 Delivery & Setup:
 ${delivLine}
+
 ━━━━━━━━━━━━━━━━━━━━━━━━━
+
 Total Balance: $${subTotal.toFixed(2)}
 Deposit Due Today (25%): $${deposit}
 Remaining Due Day of Event: $${remaining.toFixed(2)}
