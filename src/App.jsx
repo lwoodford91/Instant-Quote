@@ -48,7 +48,6 @@ function getDeliveryFee(miles) {
 }
 
 const STEPS = ["Package", "Add-Ons", "Delivery", "Discount", "Quote"];
-const ORIGIN = "7201 Paul Green Dr, Highland, CA 92346";
 
 
 
@@ -77,7 +76,6 @@ export default function PalmwoodApp() {
   const [discountDelivery, setDiscountDelivery] = useState("none");
   const [discountLabor, setDiscountLabor] = useState("none");
   const [copied, setCopied] = useState(false);
-  const [animating, setAnimating] = useState(false);
 
   const basePrice = selectedPackage ? PACKAGES[selectedPackage] : 0;
   const addonTotal = selectedAddons.reduce((sum, a) => sum + ADDONS[a], 0);
@@ -95,14 +93,8 @@ export default function PalmwoodApp() {
     setSelectedAddons(prev => prev.includes(addon) ? prev.filter(a => a !== addon) : [...prev, addon]);
   }
 
-  function goNext() {
-    setAnimating(true);
-    setTimeout(() => { setStep(s => s + 1); setAnimating(false); }, 180);
-  }
-  function goBack() {
-    setAnimating(true);
-    setTimeout(() => { setStep(s => s - 1); setAnimating(false); }, 180);
-  }
+  function goNext() { setStep(s => s + 1); }
+  function goBack() { setStep(s => s - 1); }
 
   function copyQuote() {
     const addonLines = selectedAddons.length > 0
@@ -194,9 +186,7 @@ https://www.palmwoodrentals.com/booking`;
 
       <div style={{
         width: "100%", maxWidth: 600, padding: "0 16px 32px",
-        opacity: animating ? 0 : 1,
-        transform: animating ? "translateY(8px)" : "translateY(0)",
-        transition: "opacity 0.18s, transform 0.18s",
+
       }}>
         <div style={{
           background: "rgba(255,255,255,0.04)",
@@ -280,15 +270,27 @@ https://www.palmwoodrentals.com/booking`;
                 ))}
               </div>
 
-              {(deliveryOption === "delivery" || deliveryOption === "delivery-tbd") && deliveryOption !== "delivery-tbd" && (
+              {deliveryOption === "delivery" && (
                 <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   <div>
                     <label style={labelStyle}>Delivery Address</label>
                     <input value={deliveryAddress} onChange={e => setDeliveryAddress(e.target.value)}
                       placeholder="123 Main St, City, CA 90000" style={inputStyle} />
                   </div>
-
-
+                  <div>
+                    <label style={labelStyle}>Distance from Highland, CA (miles)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      value={deliveryMiles === null ? "" : deliveryMiles}
+                      onChange={e => {
+                        const val = parseFloat(e.target.value);
+                        setDeliveryMiles(isNaN(val) ? null : val);
+                      }}
+                      placeholder="e.g. 12"
+                      style={inputStyle}
+                    />
+                  </div>
                   {deliveryMiles !== null && deliveryMiles > 0 && (
                     <div style={{
                       background: "rgba(201,168,92,0.06)", border: "1px solid rgba(201,168,92,0.15)",
@@ -299,7 +301,6 @@ https://www.palmwoodrentals.com/booking`;
                       <span style={{ fontSize: 18, color: "#c9a85c", fontWeight: 600 }}>${getDeliveryFee(deliveryMiles)}</span>
                     </div>
                   )}
-
                   <div style={{ fontSize: 11, color: "#3a3050", lineHeight: 1.8 }}>
                     Fee tiers: ≤10mi $25 · ≤20mi $40 · ≤30mi $55 · ≤40mi $70 · ≤50–75mi $85 · 86mi+ $110
                   </div>
