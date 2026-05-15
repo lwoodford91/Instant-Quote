@@ -51,18 +51,26 @@ const STEPS = ["Package", "Add-Ons", "Delivery", "Discount", "Quote"];
 const ORIGIN = "7201 Paul Green Dr, Highland, CA 92346";
 
 async function estimateMiles(destination) {
-  const response = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: "claude-sonnet-4-20250514",
-      max_tokens: 100,
-      messages: [{
-        role: "user",
-        content: `What is the approximate one-way driving distance in miles from "${ORIGIN}" to "${destination}"? Reply with ONLY a single number rounded to one decimal. No words, no units, just the number.`
-      }]
-    })
+  const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
+  if (!apiKey) throw new Error("Google Maps API key not configured");
+
+  const params = new URLSearchParams({
+    origins: ORIGIN,
+    destinations: destination,
+    units: "imperial",
+    key: apiKey,
   });
+
+  const response = await fetch(
+    `https://maps.googleapis.com/maps/api/distancematrix/json?${params}`
+  );
+  const data = await response.json();
+  if (data.status !== "OK") throw new Error("Maps API error: " + data.status);
+  const element = data.rows?.[0]?.elements?.[0];
+  if (!element || element.status !== "OK") throw new Error("No route found");
+  const miles = element.distance.value / 1609.344;
+  return Math.round(miles * 10) / 10;
+}
   const data = await response.json();
   const text = data?.content?.[0]?.text?.trim();
   const num = parseFloat(text);
