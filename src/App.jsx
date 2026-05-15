@@ -288,33 +288,17 @@ https://www.palmwoodrentals.com/booking`;
                       placeholder="123 Main St, City, CA 90000" style={inputStyle} />
                   </div>
 
-                  <div style={{
-                    background: "rgba(201,168,92,0.06)", border: "1px solid rgba(201,168,92,0.15)",
-                    borderRadius: 10, padding: "14px 16px",
-                    minHeight: 50, display: "flex", alignItems: "center", gap: 10,
-                  }}>
-                    {milesLoading && (
-                      <><Spinner /><span style={{ fontSize: 13, color: "#7a7080" }}>Calculating distance from Highland, CA…</span></>
-                    )}
-                    {!milesLoading && milesError && (
-                      <span style={{ fontSize: 13, color: "#e87a7a" }}>⚠️ {milesError}</span>
-                    )}
-                    {!milesLoading && !milesError && deliveryMiles != null && (
-                      <div style={{ display: "flex", justifyContent: "space-between", width: "100%", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
-                        <div>
-                          <span style={{ fontSize: 13, color: "#7a7080" }}>Distance: </span>
-                          <span style={{ fontSize: 15, color: "#f0ece4", fontWeight: 500 }}>{deliveryMiles} miles</span>
-                        </div>
-                        <div>
-                          <span style={{ fontSize: 13, color: "#7a7080" }}>Delivery Fee: </span>
-                          <span style={{ fontSize: 17, color: "#c9a85c", fontWeight: 600 }}>${getDeliveryFee(deliveryMiles)}</span>
-                        </div>
-                      </div>
-                    )}
-                    {!milesLoading && !milesError && deliveryMiles == null && deliveryAddress.length < 8 && (
-                      <span style={{ fontSize: 13, color: "#4a4055" }}>Enter your address above to auto-calculate distance & fee</span>
-                    )}
-                  </div>
+
+                  {deliveryMiles !== null && deliveryMiles > 0 && (
+                    <div style={{
+                      background: "rgba(201,168,92,0.06)", border: "1px solid rgba(201,168,92,0.15)",
+                      borderRadius: 10, padding: "14px 16px",
+                      display: "flex", justifyContent: "space-between", alignItems: "center",
+                    }}>
+                      <span style={{ fontSize: 13, color: "#7a7080" }}>Delivery Fee</span>
+                      <span style={{ fontSize: 18, color: "#c9a85c", fontWeight: 600 }}>${getDeliveryFee(deliveryMiles)}</span>
+                    </div>
+                  )}
 
                   <div style={{ fontSize: 11, color: "#3a3050", lineHeight: 1.8 }}>
                     Fee tiers: ≤10mi $25 · ≤20mi $40 · ≤30mi $55 · ≤40mi $70 · ≤50–75mi $85 · 86mi+ $110
