@@ -50,30 +50,43 @@ function getDeliveryFee(miles) {
 const STEPS = ["Package", "Add-Ons", "Delivery", "Discount", "Quote"];
 const ORIGIN = "7201 Paul Green Dr, Highland, CA 92346";
 
+function loadGoogleMaps(apiKey) {
+  return new Promise((resolve, reject) => {
+    if (window.google && window.google.maps) { resolve(); return; }
+    const script = document.createElement("script");
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=geometry`;
+    script.async = true;
+    script.onload = resolve;
+    script.onerror = reject;
+    document.head.appendChild(script);
+  });
+}
+
 async function estimateMiles(destination) {
   const apiKey = process.env.REACT_APP_GOOGLE_MAPS_API_KEY;
   if (!apiKey) throw new Error("Google Maps API key not configured");
 
-  const params = new URLSearchParams({
-    origins: ORIGIN,
-    destinations: destination,
-    units: "imperial",
-    key: apiKey,
+  await loadGoogleMaps(apiKey);
+
+  return new Promise((resolve, reject) => {
+    const service = new window.google.maps.DistanceMatrixService();
+    service.getDistanceMatrix(
+      {
+        origins: [ORIGIN],
+        destinations: [destination],
+        travelMode: window.google.maps.TravelMode.DRIVING,
+        unitSystem: window.google.maps.UnitSystem.IMPERIAL,
+      },
+      (response, status) => {
+        if (status !== "OK") { reject(new Error("Maps error: " + status)); return; }
+        const element = response.rows?.[0]?.elements?.[0];
+        if (!element || element.status !== "OK") { reject(new Error("No route found")); return; }
+        // distance.value is in meters
+        const miles = element.distance.value / 1609.344;
+        resolve(Math.round(miles * 10) / 10);
+      }
+    );
   });
-
-  const response = await fetch(
-    `https://maps.googleapis.com/maps/api/distancematrix/json?${params}`
-  );
-  const data = await response.json();
-
-  if (data.status !== "OK") throw new Error("Maps API error: " + data.status);
-
-  const element = data.rows?.[0]?.elements?.[0];
-  if (!element || element.status !== "OK") throw new Error("No route found");
-
-  // distance.value is in meters, convert to miles
-  const miles = element.distance.value / 1609.344;
-  return Math.round(miles * 10) / 10;
 }
 
 function applyDiscount(amount, code) {
