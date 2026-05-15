@@ -65,17 +65,15 @@ async function estimateMiles(destination) {
     `https://maps.googleapis.com/maps/api/distancematrix/json?${params}`
   );
   const data = await response.json();
+
   if (data.status !== "OK") throw new Error("Maps API error: " + data.status);
+
   const element = data.rows?.[0]?.elements?.[0];
   if (!element || element.status !== "OK") throw new Error("No route found");
+
+  // distance.value is in meters, convert to miles
   const miles = element.distance.value / 1609.344;
   return Math.round(miles * 10) / 10;
-}
-  const data = await response.json();
-  const text = data?.content?.[0]?.text?.trim();
-  const num = parseFloat(text);
-  if (isNaN(num)) throw new Error("Could not parse miles");
-  return num;
 }
 
 function applyDiscount(amount, code) {
