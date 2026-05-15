@@ -2,7 +2,7 @@
   "name": "palmwood-rentals",
   "version": "1.0.0",
   "description": "Event Quote Builder for Palmwood Rentals",
-  "homepage": "https://lwoodford91.github.io/palmwood-rentals",
+  "homepage": "https://lwoodford91.github.io/Instant-Quote",
   "private": true,
   "dependencies": {
     "gh-pages": "^6.0.0",
