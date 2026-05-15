@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/Instant-Quote/static/css/main.189b5cf4.css",
-    "main.js": "/Instant-Quote/static/js/main.7a5306a5.js",
+    "main.js": "/Instant-Quote/static/js/main.a104decf.js",
     "index.html": "/Instant-Quote/index.html",
     "main.189b5cf4.css.map": "/Instant-Quote/static/css/main.189b5cf4.css.map",
-    "main.7a5306a5.js.map": "/Instant-Quote/static/js/main.7a5306a5.js.map"
+    "main.a104decf.js.map": "/Instant-Quote/static/js/main.a104decf.js.map"
   },
   "entrypoints": [
     "static/css/main.189b5cf4.css",
-    "static/js/main.7a5306a5.js"
+    "static/js/main.a104decf.js"
   ]
 }
